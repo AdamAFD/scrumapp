@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment # Kubernetes resource kind we are creating
+metadata:
+  name: scrum-back
+spec:
+  selector:
+    matchLabels:
+      app: scrum
+  replicas: 2 # Number of replicas that will be created for this deployment
+  template:
+    metadata:
+      labels:
+        app: scrum
+    spec:
+      containers:
+        - name: "                  "
+          image: "                "
+          env: 
+          - name: POSTGRES_DB
+            value: scrum
+          - name: POSTGRES_USER
+            value: scrum
+          - name: POSTGRES_PASSWORD
+            value: scrum
+
+          ports:
+            - containerPort: 8080 
+# The port that the container is running on in the cluster

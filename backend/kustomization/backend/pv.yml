@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume # Create a PV
+metadata:
+  name: scrum-pv # Sets PV's name
+  labels:
+    app: scrum # Sets PV's type to local
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 5Gi # Sets PV Volume
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/mnt/data" # Sets the volume's path

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres  # Sets Deployment name
+spec:
+  serviceName: "scrum-postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:9.6-alpine # Sets Image
+          ports:
+            - containerPort: 5432  # Exposes container port
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          env:
+          - name: POSTGRES_DB
+            value: scrum
+          - name: POSTGRES_USER
+            value: scrum
+          - name: POSTGRES_PASSWORD
+            value: scrum
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+          volumes:
+            - name: postgredb
+              persistentVolumeClaim:
+                claimName: internship-postgresql-data-claim

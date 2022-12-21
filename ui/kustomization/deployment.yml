@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-ui
+  namespace: devops-internship
+spec:
+  selector:
+    matchLabels:
+      name: angular-ui
+  template:
+    metadata:
+      labels:
+        name: angular-ui
+    spec:
+      containers:
+        - name: angular-ui
+          image: docker.fawry.io:443/internship/angular-ui
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: BUILD_ENV
+              value: "development"

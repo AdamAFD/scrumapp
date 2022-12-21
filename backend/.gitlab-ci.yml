@@ -1,0 +1,66 @@
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+
+stages:          # List of stages for jobs, and their order of execution
+#  - check_master
+#  - lint_testing
+  - build_application
+#  - unit_testing
+#  - db_migration
+  - Deploy_server
+
+
+Build_Application:
+  stage: build_application
+  image: docker.fawry.io/devops/ci:maven3.6.1-jdk-8
+  script:
+    - echo "Start build application stage ....."
+    - ls -lha
+    - ls -lha
+    - ls ./resources/ci
+    - mvn -DskipTests -s ./resources/ci/settings.xml package
+  tags:
+     - cidocker  
+  #allow_failure: true  
+  artifacts:
+    when: always
+    name: "Build-$CI_JOB_NAME"
+    paths:
+        - ./target/*.jar
+  cache:
+      key: jar-build-$CI_JOB_NAME
+      paths:
+        - ./target/*.jar
+      policy: push
+
+
+
+
+Deploy_corparte:
+  image: docker.fawry.io/devops/ci:deploy-maven-170
+  stage: Deploy_server
+  script:
+     - rm -rf /var/lib/docker/runtimes && rm -rf /var/lib/docker/tmp
+     - dockerd & sleep 10
+     - ls -lha 
+#     - ls -hla ./target/
+     - cp -vr ./target/*.jar ./
+     - bash <(curl -s https://gitlab.fawry.io/devops/ci-cd/api-pipeline-spring/-/raw/main/Scripts/api-dockerfile.sh)
+     - docker build . -t docker.fawry.io/$CI_PROJECT_PATH/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
+     - docker push docker.fawry.io/$CI_PROJECT_PATH/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
+     - bash <(curl -s https://gitlab.fawry.io/devops/ci-cd/api-pipeline-spring/-/raw/main/Scripts/update-image-name.sh)
+     - sleep 10s
+  cache:
+      key: jar-build-$CI_JOB_NAME
+      paths:
+        - ./target/*.jar
+      policy: pull
+  tags:
+    - cidocker   
+  when: manual
+  environment:
+    name: $CI_PROJECT_NAME-$CI_COMMIT_REF_NAME 
+    url:   http://internship.fawry.io/corporate-api
+ 
